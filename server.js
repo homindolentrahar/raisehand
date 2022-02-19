@@ -4,6 +4,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const {
+  getSuggestion,
   getSuggestions,
   getModels,
   getTags,
@@ -22,6 +23,13 @@ app.get("/suggestions", async (req, res) => {
   const suggestions = await getSuggestions();
 
   res.json(suggestions);
+});
+
+app.get("/suggestions/:id", async (req, res) => {
+  const id = req.params.id;
+  const suggestion = await getSuggestion(id);
+
+  res.json(suggestion);
 });
 
 app.get("/tags", async (req, res) => {
@@ -45,17 +53,22 @@ app.get("/tracks", async (req, res) => {
 app.post("/create", async (req, res) => {
   const { title, description, learningModel, track, tags } = req.body;
 
-  await suggestTopic({
+  const response = await suggestTopic({
     title,
     description,
     learningModel,
     track,
     tags,
   });
+
+  res.json(response);
 });
 
-app.post("/vote", async (req, res) => {
-  await upvoteSuggestion(req.body.id);
+app.patch("/vote", async (req, res) => {
+  const pageId = req.body.id;
+  const response = await upvoteSuggestion(pageId);
+
+  res.json(response);
 });
 
 app.listen(port, () => {

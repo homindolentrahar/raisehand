@@ -56,8 +56,20 @@ async function getSuggestions() {
   return pages.results.map(fromNotionObject);
 }
 
-function suggestTopic({ title, description, learningModel, track, tags }) {
-  return notion.pages.create({
+async function getSuggestion(pageId) {
+  const page = await notion.pages.retrieve({ page_id: pageId });
+
+  return page;
+}
+
+async function suggestTopic({
+  title,
+  description,
+  learningModel,
+  track,
+  tags,
+}) {
+  const response = await notion.pages.create({
     parent: {
       database_id: process.env.DB_ID,
     },
@@ -100,24 +112,25 @@ function suggestTopic({ title, description, learningModel, track, tags }) {
       },
     },
   });
+
+  return response;
 }
 
 async function upvoteSuggestion(pageId) {
-  const suggestions = getSuggestion(pageId);
-  const votes = suggestions.votes + 1;
+  const suggestion = await getSuggestion(pageId);
+  const votes =
+    propertiesById(suggestion.properties)[process.env.VOTES_ID].number + 1;
 
-  await notion.pages.update({
+  const response = await notion.pages.update({
     page_id: pageId,
     properties: {
-      [process.env.VOTES_ID]: { number: votes },
+      [process.env.VOTES_ID]: {
+        number: votes,
+      },
     },
   });
 
-  return votes;
-}
-
-async function getSuggestion(pageId) {
-  return fromNotionObject(await notion.pages.retrieve({ page_id: pageId }));
+  return response;
 }
 
 function fromNotionObject(page) {
@@ -138,6 +151,7 @@ function fromNotionObject(page) {
 }
 
 module.exports = {
+  getSuggestion,
   getSuggestions,
   suggestTopic,
   getTags,

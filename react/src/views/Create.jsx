@@ -9,12 +9,8 @@ import {
   Button,
   Box,
   Flex,
-  Text,
   Textarea,
   Select,
-  Tag,
-  TagLabel,
-  TagCloseButton,
 } from "@chakra-ui/react";
 import { FiArrowLeft } from "react-icons/fi";
 import client from "../axios";
@@ -25,7 +21,7 @@ const Create = () => {
     handleSubmit,
     reset,
     register,
-    formState: { errors, isSubmitting, isSubmitted },
+    formState: { errors, isSubmitting },
     getValues,
   } = useForm();
 
@@ -61,20 +57,16 @@ const Create = () => {
     console.log(selectedTags);
   }, [selectedTags]);
 
-  const submit = () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        client.post("create", { ...getValues(), tags: selectedTags });
-
+  const submit = async () => {
+    return client
+      .post("create", { ...getValues(), tags: selectedTags })
+      .then(() => {
         reset();
         setSelectedTags([]);
-        resolve();
-
         navigate(-1, {
           replace: true,
         });
-      }, 3000);
-    });
+      });
   };
 
   return (
@@ -91,11 +83,7 @@ const Create = () => {
           >
             All Suggestions
           </Button>
-          <form
-            onSubmit={handleSubmit(submit)}
-            action="localhost:5000/create"
-            method="post"
-          >
+          <form onSubmit={handleSubmit(submit)} method="post">
             <Flex direction="column" gap={4}>
               <FormControl isInvalid={errors.title}>
                 <FormLabel htmlFor="title" fontSize="sm" color="gray.600">

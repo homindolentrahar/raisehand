@@ -1,10 +1,22 @@
 import React from "react";
 import { Box, Button, Divider, Flex, Tag, Text } from "@chakra-ui/react";
 import { FiTrendingUp } from "react-icons/fi";
+import { useForm } from "react-hook-form";
 import TagItem from "./TagItem";
 import client from "../axios";
 
 const SuggestionItem = ({ item }) => {
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm();
+
+  const handleVote = async () => {
+    return client.patch("vote", {
+      id: item.id,
+    });
+  };
+
   return (
     <>
       <Box
@@ -38,20 +50,20 @@ const SuggestionItem = ({ item }) => {
           ))}
         </Flex>
         <Flex gap={2} direction="row" alignItems="end">
-          <Button
-            colorScheme="green"
-            w="full"
-            mt={3}
-            leftIcon={<FiTrendingUp />}
-            gap={2}
-            onClick={async () => {
-              await client.post("vote", {
-                id: item.id,
-              });
-            }}
-          >
-            Vote Up
-          </Button>
+          <form onSubmit={handleSubmit(handleVote)}>
+            <Button
+              colorScheme="green"
+              w="full"
+              mt={3}
+              leftIcon={<FiTrendingUp />}
+              gap={2}
+              isLoading={isSubmitting}
+              loadingText="Votting"
+              type="submit"
+            >
+              Vote Up
+            </Button>
+          </form>
           <Button disabled>{item.vote}</Button>
         </Flex>
       </Box>
